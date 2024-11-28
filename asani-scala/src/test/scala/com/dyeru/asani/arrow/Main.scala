@@ -8,7 +8,7 @@ def main(): Unit = {
   //  println(schema)
   case class User(id: Int, name: String, nick: Option[String], bytes: Array[Byte])
 
-  val s = new ArrowSchema {}.schema[User]
+  val s = new ArrowSchema {}.of[User]
 
   println(s)
 }
