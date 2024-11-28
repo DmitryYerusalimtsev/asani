@@ -109,4 +109,25 @@ class ArrowSchemaTest extends AnyFunSuite with Matchers {
     field.getType shouldBe ArrowType.List()
   }
 
+  test("schema should handle multiple fields correctly") {
+    case class TestCase(id: Int, name: String, timestamp: java.time.Instant)
+
+    val schema: Schema = ArrowSchema.of[TestCase]
+
+    // Verify the first field (id)
+    val field1 = schema.getFields.get(0)
+    field1.getName shouldBe "id"
+    field1.getType shouldBe Types.MinorType.INT.getType
+
+    // Verify the second field (name)
+    val field2 = schema.getFields.get(1)
+    field2.getName shouldBe "name"
+    field2.getType shouldBe Types.MinorType.VARCHAR.getType
+
+    // Verify the third field (timestamp)
+    val field3 = schema.getFields.get(2)
+    field3.getName shouldBe "timestamp"
+    field3.getType shouldBe Types.MinorType.TIMESTAMPMILLI.getType
+  }
+
 }
