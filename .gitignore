@@ -10,3 +10,5 @@ hs_err_pid*
 /asani-scala/.bsp/
 /asani-scala/project/project/
 asani-scala/src/main/scala/com/.DS_Store
+
+**/.DS_Store
