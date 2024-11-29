@@ -21,7 +21,7 @@ trait ArrowSchema {
           case list: ArrowType.List => new Field(name, FieldType.nullable(list),
             List(new Field("item", FieldType.nullable(Types.MinorType.VARCHAR.getType), null)).asJava)
           case tpe: ArrowType => new Field(name, FieldType.notNullable(tpe), null)
-          case (_, _) => throw new IllegalArgumentException("Not support Arrow type.")
+          case (_, _) => throw new IllegalArgumentException("Not supported Arrow type.")
         }
       )
 
