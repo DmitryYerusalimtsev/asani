@@ -17,22 +17,21 @@ trait ArrowSchema {
     val arrowFields = labels.zip(types)
       .map((name, arrowType) =>
         arrowType match {
-          case (true, tpe) => new Field(name, FieldType.nullable(tpe), null)
+          case (null, tpe) => new Field(name, FieldType.nullable(tpe), null)
           case tpe: ArrowType => new Field(name, FieldType.notNullable(tpe), null)
-          case (false, t) => throw new IllegalArgumentException(s"Wrong Option data type mapping: $t")
         }
       )
 
     new Schema(arrowFields.asJava)
   }
 
-  private inline def getTypes[T <: Tuple]: List[ArrowType | (Boolean, ArrowType)] =
+  private inline def getTypes[T <: Tuple]: List[ArrowType | (Null, ArrowType)] =
     inline erasedValue[T] match {
       case _: EmptyTuple => Nil
       case _: (head *: tail) => arrowType[head] :: getTypes[tail]
     }
 
-  private inline def arrowType[T]: ArrowType | (Boolean, ArrowType) =
+  private inline def arrowType[T]: ArrowType | (Null, ArrowType) =
     inline erasedValue[T] match {
       case _: Int => Types.MinorType.INT.getType
       case _: Long => Types.MinorType.BIGINT.getType
@@ -43,11 +42,9 @@ trait ArrowSchema {
       case _: Array[Byte] => Types.MinorType.VARBINARY.getType
       case _: Instant => Types.MinorType.TIMESTAMPMILLI.getType
       case _: Seq[t] => new ArrowType.List()
-      case _: Option[t] =>
-        val tpe = arrowType[t] match
-          case t: ArrowType => t
-          case _ => throw new IllegalArgumentException(s"Unsupported type inside Option")
-        (true, tpe)
+      case _: Option[t] => arrowType[t] match
+        case t: ArrowType => (null, t)
+        case _ => throw new IllegalArgumentException(s"Unsupported type inside Option")
       case t => throw new IllegalArgumentException(s"Unsupported type: $t")
     }
 }
