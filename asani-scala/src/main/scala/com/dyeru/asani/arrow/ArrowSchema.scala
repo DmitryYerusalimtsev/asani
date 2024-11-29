@@ -18,8 +18,8 @@ trait ArrowSchema {
       .map((name, arrowType) =>
         arrowType match {
           case (_: ArrowType.Null, tpe) => new Field(name, FieldType.nullable(tpe), null)
-          case list: ArrowType.List => new Field(name, FieldType.nullable(list),
-            List(new Field("item", FieldType.nullable(Types.MinorType.VARCHAR.getType), null)).asJava)
+          case list: ArrowType.List => new Field(name, FieldType.nullable(list), List(
+            new Field("item", FieldType.nullable(Types.MinorType.VARCHAR.getType), null)).asJava)
           case tpe: ArrowType => new Field(name, FieldType.notNullable(tpe), null)
           case (_, _) => throw new IllegalArgumentException("Not supported Arrow type.")
         }
