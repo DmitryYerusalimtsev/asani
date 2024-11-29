@@ -1,18 +1,15 @@
 package com.dyeru.asani.arrow
 
-import org.apache.arrow.memory.{ArrowBuf, BufferAllocator, RootAllocator}
+import org.apache.arrow.memory.RootAllocator
 import org.apache.arrow.vector.*
 import org.apache.arrow.vector.complex.ListVector
-import org.apache.arrow.vector.ipc.InvalidArrowFileException
 import org.apache.arrow.vector.types.pojo.Schema
 
-import scala.deriving.Mirror
-import scala.util.Using
-import scala.jdk.CollectionConverters.*
 import java.nio.charset.StandardCharsets
 import java.time.Instant
 import scala.annotation.tailrec
-import scala.util.{Success, Failure}
+import scala.deriving.Mirror
+import scala.jdk.CollectionConverters.*
 
 extension [F[_] <: Seq[_], T: Mirror.ProductOf](values: F[T])
   inline def toArrowVector: VectorSchemaRoot = ToVector[T]().toVector(values.asInstanceOf[Seq[T]])
