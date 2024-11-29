@@ -10,7 +10,7 @@ import scala.jdk.CollectionConverters.*
 
 trait ArrowSchema {
 
-  inline def of[A](using p: Mirror.ProductOf[A]): Schema = {
+  inline def schemaOf[A](using p: Mirror.ProductOf[A]): Schema = {
     val labels = constValueTuple[p.MirroredElemLabels].toList.asInstanceOf[List[String]]
     val types = getTypes[p.MirroredElemTypes]
 
