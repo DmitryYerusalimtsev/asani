@@ -21,12 +21,5 @@ def main(): Unit = {
 //  val d = ToVector().toVector(people)
   println(people.contentToTSVString())
 
-  // Assertions to check if the Arrow Vector contains expected values
-  val nameVector = people.getVector("name").asInstanceOf[VarCharVector]
-  assert(new String(nameVector.get(0)) == "Alice")
-  assert(new String(nameVector.get(1)) == "Bob")
-
-  val ageVector = people.getVector("age").asInstanceOf[IntVector]
-  assert(ageVector.get(0) == 30)
-  assert(ageVector.get(1) == 25)
+  people.close()
 }

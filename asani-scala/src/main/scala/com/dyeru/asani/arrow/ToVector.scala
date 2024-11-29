@@ -12,6 +12,7 @@ import scala.jdk.CollectionConverters.*
 import java.nio.charset.StandardCharsets
 import java.time.Instant
 import scala.annotation.tailrec
+import scala.util.{Success, Failure}
 
 extension [F[_] <: Seq[_], T: Mirror.ProductOf](values: F[T])
   inline def toArrowVector: VectorSchemaRoot = ToVector[T]().toVector(values.asInstanceOf[Seq[T]])
@@ -27,28 +28,26 @@ object ToVector extends ArrowSchema {
     (values: Seq[T]) => {
       val records = values.map(implicitly[ToMap[T]].toMap)
 
-      Using(new RootAllocator()) { allocator =>
-        Using(VectorSchemaRoot.create(schema, allocator)) { root =>
-          root
-            .getFieldVectors
-            .asScala
-            .foreach(vector => Using(vector) { vec =>
-              vec match
-                case v: FixedWidthVector => v.allocateNew(records.length)
-                case v: VariableWidthFieldVector => v.allocateNew(records.length)
+      val allocator = new RootAllocator()
+      val root = VectorSchemaRoot.create(schema, allocator)
+      root.allocateNew()
 
-              records
-                .map(_(vec.getName))
-                .zipWithIndex
-                .foreach((value, index) => setField(vec, index, value))
+      root
+        .getFieldVectors
+        .asScala
+        .foreach(vector =>
+          records
+            .map(_(vector.getName))
+            .zipWithIndex
+            .foreach((value, index) => setField(vector, index, value))
 
-              vec.setValueCount(records.length)
-            })
+          vector.setValueCount(records.length)
+        )
 
-          root.setRowCount(values.length)
-          root
-        }
-      }.flatten.getOrElse(throw new InvalidArrowFileException(""))
+      root.setRowCount(values.length)
+      println(root.contentToTSVString())
+
+      root
     }
 
   @tailrec
@@ -65,16 +64,14 @@ object ToVector extends ArrowSchema {
 
       case v: Seq[_] =>
         val writer = vector.asInstanceOf[ListVector].getWriter
+        writer.setPosition(index)
         writer.startList()
-        v.zipWithIndex.foreach { (elem, i) =>
-          writer.setPosition(i)
-          writer.writeVarChar(elem.toString)
-        }
-        writer.setValueCount(v.length)
+        v.zipWithIndex.foreach((elem, i) => writer.writeVarChar(elem.toString))
         writer.endList()
+        writer.setValueCount(v.length)
 
       case v: Option[_] => v match
         case Some(iv) => setField(vector, index, iv)
-        case None => throw new Exception("temp") // vector.getValidityBuffer.asInstanceOf.setB(1, false)
+        case None => vector.setNull(index)
     }
 }
