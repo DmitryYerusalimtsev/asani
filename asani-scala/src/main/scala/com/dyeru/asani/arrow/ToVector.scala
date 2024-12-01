@@ -11,18 +11,20 @@ import scala.annotation.tailrec
 import scala.deriving.Mirror
 import scala.jdk.CollectionConverters.*
 
-extension [F[_] <: Seq[_], T: Mirror.ProductOf](values: F[T])
-  inline def toArrowVector: VectorSchemaRoot = ToVector[T]().toVector(values.asInstanceOf[Seq[T]])
+extension[F[_] <: Seq[_], T: Mirror.ProductOf](values: F[T]) (using instance: ToVector[T] )
+  def toArrowVector: VectorSchemaRoot = instance.toVector(values.asInstanceOf[Seq[T]])
 
 trait ToVector[T] {
   def toVector(values: Seq[T]): VectorSchemaRoot
 }
 
-object ToVector extends ArrowSchema {
-  inline def apply[T: Mirror.ProductOf : ToMap]: ToVector[T] =
-    val schema: Schema = schemaOf[T]
+object ToVector {
+  def apply[T](using toVector: ToVector[T]): ToVector[T] = toVector
 
+  private inline def derived[T](using p: Mirror.ProductOf[T]): ToVector[T] = {
     (values: Seq[T]) => {
+      val schema: Schema = ArrowSchema.schemaOf[T]
+
       val records = values.map(implicitly[ToMap[T]].toMap)
 
       val allocator = new RootAllocator()
@@ -42,10 +44,9 @@ object ToVector extends ArrowSchema {
         )
 
       root.setRowCount(values.length)
-      println(root.contentToTSVString())
-
       root
     }
+  }
 
   @tailrec
   private def setField(vector: FieldVector, index: Int, value: Any): Unit =
@@ -71,4 +72,7 @@ object ToVector extends ArrowSchema {
         case Some(iv) => setField(vector, index, iv)
         case None => vector.setNull(index)
     }
+
+  // Enable derivation for case classes
+  inline given derivedToVector[T](using m: Mirror.ProductOf[T]): ToVector[T] = derived
 }

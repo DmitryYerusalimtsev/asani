@@ -1,6 +1,7 @@
 package com.dyeru.asani.arrow
 
 import org.apache.arrow.vector.{IntVector, VarCharVector}
+import com.dyeru.asani.arrow.flight.*
 
 case class Frame(image: Array[Byte], metadata: String, timestamp: Long)
 
@@ -16,10 +17,19 @@ def main(): Unit = {
   case class Person(name: String, age: Int, active: Boolean)
 
   val person = Person("Alice", 30, true)
-//  val d = ToMap[Person].toMap(person)
-  val people = Seq(person, person).toArrowVector
-//  val d = ToVector().toVector(people)
+  val person2 = Person("Ben", 42, false)
+
+  val people = Seq(person, person2).toArrowVector
   println(people.contentToTSVString())
 
+  val recoveredPeople: List[Person] = people.toProducts
+
+  println(recoveredPeople)
+
   people.close()
+
+  val processor = new Processor[Person, Person] {
+    def process(in: List[Person]): List[Person] = in
+  }
+  Server(processor).start()
 }
