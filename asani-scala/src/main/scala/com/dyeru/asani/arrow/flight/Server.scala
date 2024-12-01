@@ -15,7 +15,7 @@ class Server[
   In: ToProduct : Mirror.ProductOf,
   Out: ToMap : ToVector : Mirror.ProductOf]
 (processor: Processor[In, Out]) {
-  
+
   def start(host: String = "localhost", port: Int = 47470): Unit = {
     val location = Location.forGrpcInsecure(host, port)
 
@@ -32,7 +32,8 @@ class Server[
 
 class AsaniProducer[
   In: ToProduct : Mirror.ProductOf,
-  Out: ToVector : ToMap : Mirror.ProductOf]
+  Out: ToVector : ToMap : Mirror.ProductOf
+]
 (processor: Processor[In, Out]) extends NoOpFlightProducer {
   override def doExchange(context: CallContext,
                           reader: FlightStream,
