@@ -11,8 +11,12 @@ import java.nio.charset.StandardCharsets
 import scala.deriving.Mirror
 import scala.deriving.Mirror.ProductOf
 
-class Server[In: ToProduct : Mirror.ProductOf, Out: ToMap : ToVector : Mirror.ProductOf](processor: Processor[In, Out]) {
-  inline def start(host: String = "localhost", port: Int = 47470): Unit = {
+class Server[
+  In: ToProduct : Mirror.ProductOf,
+  Out: ToMap : ToVector : Mirror.ProductOf]
+(processor: Processor[In, Out]) {
+  
+  def start(host: String = "localhost", port: Int = 47470): Unit = {
     val location = Location.forGrpcInsecure(host, port)
 
     val allocator = new RootAllocator(Long.MaxValue)
@@ -39,10 +43,10 @@ class AsaniProducer[
       case Put => doPut(context, reader, writer, processor)
   }
 
-  private inline def doPut(context: CallContext,
-                           reader: FlightStream,
-                           writer: ServerStreamListener,
-                           processor: Processor[In, Out]): Unit = {
+  private def doPut(context: CallContext,
+                    reader: FlightStream,
+                    writer: ServerStreamListener,
+                    processor: Processor[In, Out]): Unit = {
     while (reader.next()) {
       if (reader.hasRoot) {
         val requestData: List[In] = reader.getRoot.toProducts
