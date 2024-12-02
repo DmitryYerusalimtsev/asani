@@ -30,7 +30,6 @@ class FlightProcessor(ABC, Generic[In, Out]):
 
         writer.begin(response.schema)
         writer.write_table(response)
-        writer.done_writing()
 
     @abstractmethod
     def command(self) -> str:

@@ -3,11 +3,18 @@ from typing import List
 
 import pyarrow.flight as flight
 import pytest
+from pydantic import BaseModel
 
 from asani.arrow.flight.flight_processor import FlightProcessor
 from asani.arrow.flight.server import AsaniFlightServer
 from asani.arrow.serializer import Serializer
-from tests.arrow.flight.test_flight_processor import Person
+
+
+# Sample Pydantic model for testing
+class Person(BaseModel):
+    name: str
+    age: int
+    birthday: datetime
 
 
 # Define mock processors
@@ -60,10 +67,9 @@ def test_asani_flight_server():
         root = ser.to_table(sample_data)
 
         # Send a request (can send Arrow batches if required)
-        print(type(writer))
         writer.begin(root.schema)
         writer.write_table(root)
-        writer.close()
+        writer.done_writing()
 
         # Read response from server
         response_table = reader.read_all()
