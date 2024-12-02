@@ -11,4 +11,6 @@ hs_err_pid*
 /asani-scala/project/project/
 asani-scala/src/main/scala/com/.DS_Store
 
+/asani-python/.idea/
+
 **/.DS_Store
