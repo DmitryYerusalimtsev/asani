@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic, List
+from typing import TypeVar, Generic, List, Type
 import pyarrow as pa
 from pydantic import BaseModel
 from asani.arrow.serializer import Serializer
@@ -9,30 +9,28 @@ In = TypeVar("In", bound=BaseModel)
 Out = TypeVar("Out", bound=BaseModel)
 
 
-class FlightProcessor(ABC, Generic[In, Out], Processor[In, Out]):
+class FlightProcessor(ABC, Generic[In, Out]):
 
-    def __init__(self):
-        super().__init__()  # Use super to ensure proper initialization
-        self.request_serializer: Serializer[In] = Serializer[In]
-        self.response_serializer: Serializer[Out] = Serializer[Out]
+    def __init__(self, request_model: Type[In], response_model: Type[Out]):
+        super().__init__()
+        self.request_serializer = Serializer(request_model)
+        self.response_serializer = Serializer(response_model)
 
     def process_request(self, reader, writer):
         models = []
+        table = reader.read_all()
 
-        root = reader.get_root()
-        while reader.next():
-            try:
-                table = pa.Table.from_batches([root.to_pandas()])
-                models = self.request_serializer.from_table(table)
-            except Exception as e:
-                print(f"Error parsing records to model: {root}, error: {e}")
+        try:
+            models = self.request_serializer.from_table(table)
+        except Exception as e:
+            print(f"Error parsing records to model: {table}, error: {e}")
 
         result = self.process(models)
         response = self.response_serializer.to_table(result)
 
         writer.begin(response.schema)
-        writer.write_batches(response.to_batches())
-        writer.end()
+        writer.write_table(response)
+        writer.done_writing()
 
     @abstractmethod
     def command(self) -> str:

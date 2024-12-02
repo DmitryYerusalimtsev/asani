@@ -50,6 +50,9 @@ class TestFlightProcessor(FlightProcessor[Person, Person]):
     def __init__(self):
         super().__init__()
 
+    def command(self) -> str:
+        raise NotImplemented()
+
     def process(self, models: List[Person]) -> List[Person]:
         # Mock process function: Just return the models as they are
         return models
