@@ -1,9 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import TypeVar, Generic, List, Type
-import pyarrow as pa
 from pydantic import BaseModel
 from asani.arrow.serializer import Serializer
-from asani.processor import Processor
 
 In = TypeVar("In", bound=BaseModel)
 Out = TypeVar("Out", bound=BaseModel)
