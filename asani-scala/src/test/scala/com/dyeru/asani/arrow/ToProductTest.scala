@@ -4,7 +4,6 @@ import com.dyeru.asani.arrow.createVectorSchemaRoot
 import org.scalatest.funsuite.AnyFunSuite
 import org.apache.arrow.vector.types.pojo.{Field, FieldType}
 import org.apache.arrow.vector.types.Types.MinorType
-import com.dyeru.asani.arrow.ToProduct.*
 
 import java.time.Instant
 

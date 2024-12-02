@@ -1,7 +1,6 @@
 package com.dyeru.asani.arrow
 
 import org.apache.arrow.vector.{IntVector, VarCharVector, VectorSchemaRoot}
-import com.dyeru.asani.arrow.flight.*
 import org.apache.arrow.memory.RootAllocator
 
 case class Frame(image: Array[Byte], metadata: String, timestamp: Long)
@@ -19,7 +18,7 @@ def main(): Unit = {
 
   val allocator = new RootAllocator(Long.MaxValue)
   val root = VectorSchemaRoot.create(ArrowSchema.derived[Person].schema, allocator)
-  
+
   val person = Person("Alice", 30, true)
   val person2 = Person("Ben", 42, false)
 
@@ -31,9 +30,4 @@ def main(): Unit = {
   println(recoveredPeople)
 
   people.close()
-
-  val processor = new Processor[Person, Person] {
-    def process(in: List[Person]): List[Person] = in
-  }
-  Server(processor).start()
 }

@@ -1,6 +1,5 @@
 package com.dyeru.asani.arrow.flight
 
-import com.dyeru.asani.arrow.Processor
 import org.apache.arrow.flight.*
 import org.apache.arrow.memory.RootAllocator
 import org.apache.arrow.vector.{BitVector, IntVector, VarCharVector, VectorSchemaRoot}
@@ -8,6 +7,7 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 import org.apache.arrow.vector.types.pojo.*
 
+import java.nio.charset.StandardCharsets
 import scala.jdk.CollectionConverters.*
 
 class ServerTest extends AnyFunSuite with Matchers {
@@ -16,12 +16,14 @@ class ServerTest extends AnyFunSuite with Matchers {
   case class PersonEnriched(name: String, age: Int, enriched: Boolean)
 
   // Create a simple processor that echoes input data
-  val processor = new Processor[Person, PersonEnriched] {
+  val processor = new FlightProcessor[Person, PersonEnriched] {
+    def command: String = "PUT"
+
     def process(in: List[Person]): List[PersonEnriched] = in.map(p => PersonEnriched(p.name, p.age, true))
   }
 
   // Define the test server
-  val server = new Server[Person, PersonEnriched](processor)
+  val server = new Server(List(processor))
 
   // RootAllocator for Arrow Flight
   val allocator = new RootAllocator(Long.MaxValue)
@@ -58,7 +60,7 @@ class ServerTest extends AnyFunSuite with Matchers {
     val root = VectorSchemaRoot.create(schema, allocator)
 
     // Create a FlightDescriptor for the command
-    val command = AsaniProducer.Command.Put.toArray
+    val command = "PUT".getBytes(StandardCharsets.UTF_8)
     val descriptor = FlightDescriptor.command(command)
 
     // Send data to the server
@@ -105,6 +107,8 @@ class ServerTest extends AnyFunSuite with Matchers {
     }
 
     // Close client and server
+    root.close()
+    responseRoot.close()
     client.close()
     serverThread.interrupt()
   }
