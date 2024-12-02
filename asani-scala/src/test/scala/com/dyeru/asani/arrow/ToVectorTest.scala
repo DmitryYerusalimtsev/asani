@@ -1,9 +1,8 @@
 package com.dyeru.asani.arrow
 
-import org.apache.arrow.memory.{ArrowBuf, BufferAllocator, RootAllocator}
+import org.apache.arrow.memory.RootAllocator
 import org.apache.arrow.vector.*
 import org.apache.arrow.vector.complex.ListVector
-import org.apache.arrow.vector.ipc.InvalidArrowFileException
 import org.apache.arrow.vector.types.pojo.Schema
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -17,7 +16,10 @@ class ToVectorTest extends AnyFunSuite {
   test("toArrowVector should convert Person case class to Arrow Vector") {
     val people = Seq(Person("Alice", 30), Person("Bob", 25))
 
-    val vectorRoot = people.toArrowVector
+    val allocator = new RootAllocator(Long.MaxValue)
+    val root = VectorSchemaRoot.create(ArrowSchema.derived[Person].schema, allocator)
+
+    val vectorRoot = people.toArrowVector(root)
 
     // Assertions to check if the Arrow Vector contains expected values
     val nameVector = vectorRoot.getVector("name").asInstanceOf[VarCharVector]
@@ -35,7 +37,10 @@ class ToVectorTest extends AnyFunSuite {
   test("toArrowVector should convert Employee case class to Arrow Vector") {
     val employees = Seq(Employee("Bob", "Developer", 100000.0), Employee("Alice", "Manager", 120000.0))
 
-    val vectorRoot = employees.toArrowVector
+    val allocator = new RootAllocator(Long.MaxValue)
+    val root = VectorSchemaRoot.create(ArrowSchema.derived[Employee].schema, allocator)
+
+    val vectorRoot = employees.toArrowVector(root)
 
     val nameVector = vectorRoot.getVector("name").asInstanceOf[VarCharVector]
     assert(new String(nameVector.get(0)) == "Bob")
@@ -56,7 +61,10 @@ class ToVectorTest extends AnyFunSuite {
   test("toArrowVector should convert Address case class to Arrow Vector") {
     val addresses = Seq(Address("123 Main St", "Metropolis", "12345"), Address("456 Oak St", "Smalltown", "67890"))
 
-    val vectorRoot = addresses.toArrowVector
+    val allocator = new RootAllocator(Long.MaxValue)
+    val root = VectorSchemaRoot.create(ArrowSchema.derived[Address].schema, allocator)
+
+    val vectorRoot = addresses.toArrowVector(root)
 
     val streetVector = vectorRoot.getVector("street").asInstanceOf[VarCharVector]
     assert(new String(streetVector.get(0)) == "123 Main St")
@@ -77,7 +85,10 @@ class ToVectorTest extends AnyFunSuite {
   test("toArrowVector should return an empty vector for an empty list") {
     val emptyList = Seq.empty[Person]
 
-    val vectorRoot = emptyList.toArrowVector
+    val allocator = new RootAllocator(Long.MaxValue)
+    val root = VectorSchemaRoot.create(ArrowSchema.derived[Person].schema, allocator)
+
+    val vectorRoot = emptyList.toArrowVector(root)
 
     assert(vectorRoot.getRowCount == 0)
 
@@ -90,7 +101,10 @@ class ToVectorTest extends AnyFunSuite {
 
     val people = Seq(PersonOpt("Alice", Some(30)), PersonOpt("Bob", None))
 
-    val vectorRoot = people.toArrowVector
+    val allocator = new RootAllocator(Long.MaxValue)
+    val root = VectorSchemaRoot.create(ArrowSchema.derived[PersonOpt].schema, allocator)
+
+    val vectorRoot = people.toArrowVector(root)
 
     val nameVector = vectorRoot.getVector("name").asInstanceOf[VarCharVector]
     assert(new String(nameVector.get(0)) == "Alice")
@@ -115,7 +129,10 @@ class ToVectorTest extends AnyFunSuite {
     )
 
     // Convert to Arrow Vector
-    val vectorRoot = people.toArrowVector
+    val allocator = new RootAllocator(Long.MaxValue)
+    val root = VectorSchemaRoot.create(ArrowSchema.derived[PersonWithNumbers].schema, allocator)
+
+    val vectorRoot = people.toArrowVector(root)
 
     // Access the 'phoneNumbers' field vector which will be a ListVector
     val phoneNumbersVector = vectorRoot.getVector("phoneNumbers").asInstanceOf[ListVector]
@@ -145,7 +162,10 @@ class ToVectorTest extends AnyFunSuite {
     )
 
     // Convert to Arrow Vector
-    val vectorRoot = people.toArrowVector
+    val allocator = new RootAllocator(Long.MaxValue)
+    val root = VectorSchemaRoot.create(ArrowSchema.derived[PersonWithBytes].schema, allocator)
+
+    val vectorRoot = people.toArrowVector(root)
 
     // Access the 'data' field vector which will be a ListVector containing VarBinary
     val dataVector = vectorRoot.getVector("data").asInstanceOf[VarBinaryVector]

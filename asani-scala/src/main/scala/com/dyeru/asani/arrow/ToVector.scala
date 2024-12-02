@@ -11,24 +11,22 @@ import scala.annotation.tailrec
 import scala.deriving.Mirror
 import scala.jdk.CollectionConverters.*
 
-extension[F[_] <: Seq[_], T: Mirror.ProductOf](values: F[T]) (using instance: ToVector[T] )
-  def toArrowVector: VectorSchemaRoot = instance.toVector(values.asInstanceOf[Seq[T]])
+extension [F[_] <: Seq[_], T: Mirror.ProductOf](values: F[T])(using instance: ToVector[T])
+  def toArrowVector(root: VectorSchemaRoot): VectorSchemaRoot =
+    instance.toVector(values.asInstanceOf[Seq[T]], root)
 
 trait ToVector[T] {
-  def toVector(values: Seq[T]): VectorSchemaRoot
+  def toVector(values: Seq[T], root: VectorSchemaRoot): VectorSchemaRoot
 }
 
 object ToVector {
   def apply[T](using toVector: ToVector[T]): ToVector[T] = toVector
 
   private inline def derived[T](using p: Mirror.ProductOf[T]): ToVector[T] = {
-    (values: Seq[T]) => {
-      val schema: Schema = ArrowSchema.schemaOf[T]
-
+    (values: Seq[T], root: VectorSchemaRoot) => {
+      
       val records = values.map(implicitly[ToMap[T]].toMap)
 
-      val allocator = new RootAllocator()
-      val root = VectorSchemaRoot.create(schema, allocator)
       root.allocateNew()
 
       root

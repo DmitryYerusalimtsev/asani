@@ -13,7 +13,6 @@ import scala.jdk.CollectionConverters.*
 class ServerTest extends AnyFunSuite with Matchers {
 
   case class Person(name: String, age: Int)
-
   case class PersonEnriched(name: String, age: Int, enriched: Boolean)
 
   // Create a simple processor that echoes input data
@@ -44,8 +43,8 @@ class ServerTest extends AnyFunSuite with Matchers {
     // Define the schema for Person
     val schema = new Schema(
       List(
-        new Field("name", FieldType.nullable(new ArrowType.Utf8), null),
-        new Field("age", FieldType.nullable(new ArrowType.Int(32, true)), null)
+        new Field("name", FieldType.notNullable(new ArrowType.Utf8), null),
+        new Field("age", FieldType.notNullable(new ArrowType.Int(32, true)), null)
       ).asJava
     )
 
@@ -57,15 +56,6 @@ class ServerTest extends AnyFunSuite with Matchers {
 
     // Convert the data to Arrow vectors
     val root = VectorSchemaRoot.create(schema, allocator)
-    val nameVector = root.getVector("name").asInstanceOf[VarCharVector]
-    val ageVector = root.getVector("age").asInstanceOf[IntVector]
-
-    root.allocateNew()
-    data.zipWithIndex.foreach { case (person, idx) =>
-      nameVector.setSafe(idx, person.name.getBytes)
-      ageVector.setSafe(idx, person.age)
-    }
-    root.setRowCount(data.size)
 
     // Create a FlightDescriptor for the command
     val command = AsaniProducer.Command.Put.toArray
@@ -74,15 +64,30 @@ class ServerTest extends AnyFunSuite with Matchers {
     // Send data to the server
     val clientStream: FlightClient.ExchangeReaderWriter = client.doExchange(descriptor)
 
-    val reader: FlightStream = clientStream.getReader
     val writer: FlightClient.ClientStreamListener = clientStream.getWriter;
     writer.start(root)
+
+    root.allocateNew()
+
+    val nameVector = root.getVector("name").asInstanceOf[VarCharVector]
+    val ageVector = root.getVector("age").asInstanceOf[IntVector]
+
+    data.zipWithIndex.foreach { case (person, idx) =>
+      nameVector.set(idx, person.name.getBytes)
+      ageVector.set(idx, person.age)
+    }
+    nameVector.setValueCount(data.size)
+    ageVector.setValueCount(data.size)
+
+    root.setRowCount(data.size)
 
     writer.putNext()
     writer.completed()
 
     // Validate the response
+    val reader: FlightStream = clientStream.getReader
     val responseRoot: VectorSchemaRoot = reader.getRoot
+    reader.next()
 
     val responseNameVector = responseRoot.getVector("name").asInstanceOf[VarCharVector]
     val responseAgeVector = responseRoot.getVector("age").asInstanceOf[IntVector]
@@ -96,7 +101,7 @@ class ServerTest extends AnyFunSuite with Matchers {
       val enriched = responseEnrichedVector.get(idx)
       name shouldEqual data(idx).name
       age shouldEqual data(idx).age
-      enriched shouldEqual true
+      enriched shouldEqual 1
     }
 
     // Close client and server

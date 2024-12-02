@@ -6,14 +6,17 @@ import com.dyeru.asani.arrow.flight.AsaniProducer.Command.Put
 import org.apache.arrow.flight.*
 import org.apache.arrow.flight.FlightProducer.*
 import org.apache.arrow.memory.RootAllocator
+import org.apache.arrow.vector.VectorSchemaRoot
 
 import java.nio.charset.StandardCharsets
 import scala.deriving.Mirror
 import scala.deriving.Mirror.ProductOf
+import scala.util.Using
 
 class Server[
   In: ToProduct : Mirror.ProductOf,
-  Out: ToMap : ToVector : Mirror.ProductOf]
+  Out: ToMap : ToVector : Mirror.ProductOf : ArrowSchema
+]
 (processor: Processor[In, Out]) {
 
   def start(host: String = "localhost", port: Int = 47470): Unit = {
@@ -22,7 +25,7 @@ class Server[
     val allocator = new RootAllocator(Long.MaxValue)
 
     val server = FlightServer
-      .builder(allocator, location, new AsaniProducer(processor))
+      .builder(allocator, location, new AsaniProducer(processor, allocator))
       .build()
 
     server.start()
@@ -31,38 +34,44 @@ class Server[
 }
 
 class AsaniProducer[
-  In: ToProduct : Mirror.ProductOf,
-  Out: ToVector : ToMap : Mirror.ProductOf
+  In: Mirror.ProductOf : ToProduct,
+  Out: Mirror.ProductOf : ToVector : ToMap : ArrowSchema
 ]
-(processor: Processor[In, Out]) extends NoOpFlightProducer {
+(
+  processor: Processor[In, Out],
+  allocator: RootAllocator
+) extends NoOpFlightProducer {
+
   override def doExchange(context: CallContext,
                           reader: FlightStream,
                           writer: ServerStreamListener): Unit = {
     val command = Command.fromArray(reader.getDescriptor.getCommand)
 
     command match
-      case Put => doPut(context, reader, writer, processor)
+      case Put => processRequest(context, reader, writer, processor)
   }
 
-  private def doPut(context: CallContext,
-                    reader: FlightStream,
-                    writer: ServerStreamListener,
-                    processor: Processor[In, Out]): Unit = {
-    while (reader.next()) {
-      if (reader.hasRoot) {
-        val requestData: List[In] = reader.getRoot.toProducts
-        val responseDataRoot = processor.process(requestData).toArrowVector
-        writer.start(responseDataRoot)
-        writer.setUseZeroCopy(true)
-        writer.putNext()
-        writer.putMetadata(reader.getLatestMetadata)
-        writer.completed()
-      }
+  private def processRequest(context: CallContext,
+                             reader: FlightStream,
+                             writer: ServerStreamListener,
+                             processor: Processor[In, Out]): Unit = {
+    val arrowSchema = implicitly[ArrowSchema[Out]]
 
-      // TODO: CLOSE ROOT
+    Using(VectorSchemaRoot.create(arrowSchema.schema, allocator)) { root =>
+      while (reader.next()) {
+        if (reader.hasRoot) {
+          val requestData: List[In] = reader.getRoot.toProducts
+          writer.start(root)
+          writer.setUseZeroCopy(true)
+          processor.process(requestData).toArrowVector(root)
+          writer.putNext(reader.getLatestMetadata)
+        }
+      }
+      writer.completed()
     }
   }
 }
+
 
 object AsaniProducer {
 

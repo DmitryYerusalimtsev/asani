@@ -10,7 +10,7 @@ class ArrowSchemaTest extends AnyFunSuite with Matchers {
   test("schema should handle int type") {
     case class TestCase(id: Int)
 
-    val schema: Schema = ArrowSchema.schemaOf[TestCase]
+    val schema: Schema = ArrowSchema.derived[TestCase].schema
 
     val field = schema.getFields.get(0)
     field.getName shouldBe "id"
@@ -20,7 +20,7 @@ class ArrowSchemaTest extends AnyFunSuite with Matchers {
   test("schema should handle long type") {
     case class TestCase(id: Long)
 
-    val schema: Schema = ArrowSchema.schemaOf[TestCase]
+    val schema: Schema = ArrowSchema.derived[TestCase].schema
 
     val field = schema.getFields.get(0)
     field.getName shouldBe "id"
@@ -30,7 +30,7 @@ class ArrowSchemaTest extends AnyFunSuite with Matchers {
   test("schema should handle String type") {
     case class TestCase(name: String)
 
-    val schema: Schema = ArrowSchema.schemaOf[TestCase]
+    val schema: Schema = ArrowSchema.derived[TestCase].schema
 
     val field = schema.getFields.get(0)
     field.getName shouldBe "name"
@@ -40,7 +40,7 @@ class ArrowSchemaTest extends AnyFunSuite with Matchers {
   test("schema should handle double type") {
     case class TestCase(value: Double)
 
-    val schema: Schema = ArrowSchema.schemaOf[TestCase]
+    val schema: Schema = ArrowSchema.derived[TestCase].schema
 
     val field = schema.getFields.get(0)
     field.getName shouldBe "value"
@@ -50,7 +50,7 @@ class ArrowSchemaTest extends AnyFunSuite with Matchers {
   test("schema should handle float type") {
     case class TestCase(value: Float)
 
-    val schema: Schema = ArrowSchema.schemaOf[TestCase]
+    val schema: Schema = ArrowSchema.derived[TestCase].schema
 
     val field = schema.getFields.get(0)
     field.getName shouldBe "value"
@@ -60,7 +60,7 @@ class ArrowSchemaTest extends AnyFunSuite with Matchers {
   test("schema should handle boolean type") {
     case class TestCase(flag: Boolean)
 
-    val schema: Schema = ArrowSchema.schemaOf[TestCase]
+    val schema: Schema = ArrowSchema.derived[TestCase].schema
 
     val field = schema.getFields.get(0)
     field.getName shouldBe "flag"
@@ -70,7 +70,7 @@ class ArrowSchemaTest extends AnyFunSuite with Matchers {
   test("schema should handle byte array type") {
     case class TestCase(data: Array[Byte])
 
-    val schema: Schema = ArrowSchema.schemaOf[TestCase]
+    val schema: Schema = ArrowSchema.derived[TestCase].schema
 
     val field = schema.getFields.get(0)
     field.getName shouldBe "data"
@@ -80,7 +80,7 @@ class ArrowSchemaTest extends AnyFunSuite with Matchers {
   test("schema should handle Instant type") {
     case class TestCase(timestamp: java.time.Instant)
 
-    val schema: Schema = ArrowSchema.schemaOf[TestCase]
+    val schema: Schema = ArrowSchema.derived[TestCase].schema
 
     val field = schema.getFields.get(0)
     field.getName shouldBe "timestamp"
@@ -90,7 +90,7 @@ class ArrowSchemaTest extends AnyFunSuite with Matchers {
   test("schema should handle Option[type] correctly") {
     case class TestCase(value: Option[Int])
 
-    val schema: Schema = ArrowSchema.schemaOf[TestCase]
+    val schema: Schema = ArrowSchema.derived[TestCase].schema
 
     val field = schema.getFields.get(0)
     field.getName shouldBe "value"
@@ -101,7 +101,7 @@ class ArrowSchemaTest extends AnyFunSuite with Matchers {
   test("schema should handle List[type] correctly") {
     case class TestCase(values: List[String])
 
-    val schema: Schema = ArrowSchema.schemaOf[TestCase]
+    val schema: Schema = ArrowSchema.derived[TestCase].schema
 
     val field = schema.getFields.get(0)
     field.getName shouldBe "values"
@@ -112,7 +112,7 @@ class ArrowSchemaTest extends AnyFunSuite with Matchers {
   test("schema should handle multiple fields correctly") {
     case class TestCase(id: Int, name: String, timestamp: java.time.Instant)
 
-    val schema: Schema = ArrowSchema.schemaOf[TestCase]
+    val schema: Schema = ArrowSchema.derived[TestCase].schema
 
     // Verify the first field (id)
     val field1 = schema.getFields.get(0)
