@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets
 
 class Server(processors: List[FlightProcessor[_, _]]) {
 
-  def start(host: String = "localhost", port: Int = 47470): Unit = {
+  def start(host: String = "localhost", port: Int = 8815): Unit = {
     val location = Location.forGrpcInsecure(host, port)
 
     val allocator = new RootAllocator(Long.MaxValue)
