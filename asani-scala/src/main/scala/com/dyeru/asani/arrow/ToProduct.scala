@@ -1,7 +1,7 @@
 package com.dyeru.asani.arrow
 
 import org.apache.arrow.vector.VectorSchemaRoot
-import org.apache.arrow.vector.util.Text
+import org.apache.arrow.vector.util.{JsonStringArrayList, Text}
 
 import java.time.{LocalDateTime, ZoneOffset}
 import scala.compiletime.erasedValue
@@ -41,6 +41,7 @@ object ToProduct {
     value match {
       case v: Text => v.toString
       case v: LocalDateTime => v.toInstant(ZoneOffset.UTC)
+      case v: JsonStringArrayList[_] => v.toArray.toList
       case v: Any => v
     }
 

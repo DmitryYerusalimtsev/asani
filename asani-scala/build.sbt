@@ -1,5 +1,4 @@
 ThisBuild / version := "0.1.0"
-
 ThisBuild / scalaVersion := "3.3.4"
 
 val testing = Seq(
