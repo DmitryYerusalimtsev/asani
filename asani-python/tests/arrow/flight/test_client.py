@@ -1,14 +1,12 @@
 from datetime import datetime
 from typing import List
 
-import pyarrow.flight as flight
 import pytest
 from pydantic import BaseModel
 
 from asani.arrow.flight.client import AsaniFlightClient
 from asani.arrow.flight.flight_processor import FlightProcessor
 from asani.arrow.flight.server import AsaniFlightServer
-from asani.arrow.serializer import Serializer
 
 
 # Sample Pydantic model for testing
