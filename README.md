@@ -11,6 +11,8 @@ There are 2 implementation planned:
 
 ``` scala
 
+import com.dyeru.asani.arrow.flight.{Server, FlightProcessor}
+
 case class Person(name: String, age: Int)
 case class PersonEnriched(name: String, age: Int, enriched: Boolean)
 
@@ -31,6 +33,10 @@ server.start("localhost", 47470)
 ### Client:
 
 ``` scala
+
+import com.dyeru.asani.arrow.flight.Client
+import scala.concurrent.duration.*
+import scala.concurrent.{Await, ExecutionContext}
 
 given ExecutionContext = ExecutionContext.global
 
