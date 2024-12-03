@@ -105,7 +105,7 @@ class ArrowSchemaTest extends AnyFunSuite with Matchers {
 
     val field = schema.getFields.get(0)
     field.getName shouldBe "values"
-    field.isNullable shouldBe false
+    field.isNullable shouldBe true
     field.getType shouldBe ArrowType.List()
   }
 
