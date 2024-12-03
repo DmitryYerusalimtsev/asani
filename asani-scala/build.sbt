@@ -6,10 +6,11 @@ ThisBuild / description := "Lightning-fast communication framework based on Apac
 ThisBuild / licenses := Seq(
   "Apache-2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0")
 )
+ThisBuild / versionScheme := Some("semver-spec")
 
-homepage := Some(url("https://github.com/DmitryYerusalimtsev/asani"))
+ThisBuild / homepage := Some(url("https://github.com/DmitryYerusalimtsev/asani"))
 
-developers := List(
+ThisBuild / developers := List(
   Developer(
     id = "DmitryYerusalimtsev",
     name = "Dmitry Yerusalimtsev",
@@ -18,18 +19,18 @@ developers := List(
   )
 )
 
-scmInfo := Some(
+ThisBuild / scmInfo := Some(
   ScmInfo(
     url("https://github.com/DmitryYerusalimtsev/asani"),
     "scm:git@github.com:DmitryYerusalimtsev/asani.git"
   )
 )
 
-publishTo := Some(
+ThisBuild / publishTo := Some(
   "GitHub DmitryYerusalimtsev Apache Maven Packages" at "https://maven.pkg.github.com/DmitryYerusalimtsev/asani"
 )
 
-credentials += Credentials(
+ThisBuild / credentials += Credentials(
   "GitHub Package Registry",
   "maven.pkg.github.com",
   "DmitryYerusalimtsev",
