@@ -14,7 +14,9 @@ jobs:
         java-version: '11'
         distribution: 'adopt'
     - name: Run tests
+      working-directory: ./asani-scala
       run: sbt test
+
   publish:
     runs-on: ubuntu-latest
     steps:
@@ -25,6 +27,7 @@ jobs:
         java-version: '11'
         distribution: 'adopt'
     - name: Publish package
+      working-directory: ./asani-scala
       run: sbt test publish
       env:
         GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
