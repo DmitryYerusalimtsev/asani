@@ -24,6 +24,10 @@ class Server(processors: List[FlightProcessor[_, _]]) {
   }
 }
 
+object Server {
+  def apply(processors: List[FlightProcessor[_, _]]): Server = new Server(processors)
+}
+
 class AsaniProducer(
                      processors: List[FlightProcessor[_, _]],
                      allocator: RootAllocator
