@@ -11,7 +11,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.deriving.Mirror
 import scala.util.{Failure, Success, Using}
 
-class Client(host: String, port: Int = 47470) extends AutoCloseable {
+class Client(host: String, port: Int = 8815) extends AutoCloseable {
 
   private val location = Location.forGrpcInsecure(host, port)
   private val allocator = new RootAllocator(Long.MaxValue)
