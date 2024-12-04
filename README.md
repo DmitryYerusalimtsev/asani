@@ -109,6 +109,7 @@ if __name__ == "__main__":
 
 import pyarrow.flight as flight
 from pydantic import BaseModel
+import asyncio
 
 from asani.arrow.flight.client import AsaniFlightClient
 
@@ -121,6 +122,6 @@ sample_data = [
 ]
 
 # Connect to the server using the client
-response = client.call("command_b", sample_data)
+response = asyncio.run(client.call("command_b", sample_data))
 
 ```
