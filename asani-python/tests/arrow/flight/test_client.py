@@ -2,6 +2,8 @@ from datetime import datetime
 from typing import List
 
 import pytest
+import asyncio
+
 from pydantic import BaseModel
 
 from asani.arrow.flight.client import AsaniFlightClient
@@ -31,7 +33,7 @@ class MockProcessor(FlightProcessor[Person, Person]):
 
 
 # Integration test
-def test_asani_flight_server():
+def test_asani_flight_client():
     # Create a mock server location
     location = "grpc://localhost:8815"
 
@@ -56,7 +58,7 @@ def test_asani_flight_server():
         ]
 
         # Connect to the server using the client
-        response = client.call("command_b", sample_data)
+        response = asyncio.run(client.call("command_b", sample_data))
 
         # Assert the response
         assert len(response) == 2

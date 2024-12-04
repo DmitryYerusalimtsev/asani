@@ -18,7 +18,7 @@ class AsaniFlightClient(Generic[Req, Resp]):
         self.request_serializer = Serializer(request_model)
         self.response_serializer = Serializer(response_model)
 
-    def call(self, command: str, request_data: List[Req]) -> List[Resp]:
+    async def call(self, command: str, request_data: List[Req]) -> List[Resp]:
         descriptor = FlightDescriptor.for_command(command)
         writer, reader = self.client.do_exchange(descriptor)
 
