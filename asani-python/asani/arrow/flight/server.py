@@ -1,6 +1,7 @@
 from typing import List
 from pyarrow.flight import FlightServerBase
 from asani.arrow.flight.flight_processor import FlightProcessor
+import asyncio
 
 
 class AsaniFlightServer(FlightServerBase):
@@ -8,6 +9,7 @@ class AsaniFlightServer(FlightServerBase):
     def __init__(self, location, processors: List[FlightProcessor], **kwargs):
         super().__init__(location, **kwargs)
         self.processors = processors
+        print("Asani Server started.")
 
     def do_exchange(self, context, descriptor, reader, writer):
         command = descriptor.command.decode("utf-8")
@@ -18,6 +20,6 @@ class AsaniFlightServer(FlightServerBase):
         )
 
         if processor is not None:
-            processor.process_request(reader, writer)
+            asyncio.run(processor.process_request(reader, writer))
         else:
             raise Exception(f"No registered processor for a command: {command}")

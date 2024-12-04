@@ -14,7 +14,7 @@ class FlightProcessor(ABC, Generic[In, Out]):
         self.request_serializer = Serializer(request_model)
         self.response_serializer = Serializer(response_model)
 
-    def process_request(self, reader, writer):
+    async def process_request(self, reader, writer):
         models = []
         table = reader.read_all()
 

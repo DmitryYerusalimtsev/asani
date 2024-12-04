@@ -18,6 +18,8 @@ class Server(processors: List[FlightProcessor[_, _]]) {
       .build()
 
     server.start()
+
+    println("Asani Server started.")
     server.awaitTermination()
   }
 }
