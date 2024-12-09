@@ -10,7 +10,7 @@ def parse_requirements(filename):
 setup(
     name="asani-python",
     version="0.1.0",
-    description="Python client for the Asani API",
+    description="Python implementation of the Asani",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     author="Dmitry Yerusalimtsev",
