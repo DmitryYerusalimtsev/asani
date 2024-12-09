@@ -11,7 +11,7 @@ setup(
     name="asani-python",
     version="0.1.0",
     description="Python implementation of the Asani",
-    long_description=open("README.md").read(),
+    long_description=open("../README.md").read(),
     long_description_content_type="text/markdown",
     author="Dmitry Yerusalimtsev",
     author_email="dima.yerusalimtsev@gmail.com",
