@@ -53,7 +53,7 @@ object ToVector {
       case v: Double => vector.asInstanceOf[Float8Vector].set(index, v)
       case v: Float => vector.asInstanceOf[Float4Vector].set(index, v)
       case v: Boolean => vector.asInstanceOf[BitVector].set(index, if v then 1 else 0)
-      case v: Array[Byte] => vector.asInstanceOf[VarBinaryVector].set(index, v)
+      case v: Array[Byte] => vector.asInstanceOf[LargeVarBinaryVector].set(index, v)
       case v: Instant => vector.asInstanceOf[TimeStampMilliVector].set(index, v.toEpochMilli)
 
       case v: Seq[_] =>

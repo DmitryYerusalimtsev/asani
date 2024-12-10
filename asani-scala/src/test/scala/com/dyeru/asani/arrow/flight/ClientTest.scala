@@ -12,7 +12,7 @@ import scala.jdk.CollectionConverters.*
 
 class ClientTest extends AnyFunSuite with Matchers {
 
-  case class Person(name: String, age: Int)
+  case class Person(name: String, age: Int, buffer: Array[Byte])
 
   case class PersonEnriched(name: String, age: Int, enriched: Boolean)
 
@@ -40,8 +40,8 @@ class ClientTest extends AnyFunSuite with Matchers {
     Thread.sleep(1000)
 
     val data = List(
-      Person("Alice", 30),
-      Person("Bob", 25)
+      Person("Alice", 30, Array(1, 2, 3)),
+      Person("Bob", 25, Array.fill(55000)(1))
     )
 
     given ExecutionContext = ExecutionContext.global

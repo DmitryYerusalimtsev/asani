@@ -47,7 +47,7 @@ object ArrowSchema {
       case _: Double => Types.MinorType.FLOAT8.getType
       case _: Float => Types.MinorType.FLOAT4.getType
       case _: Boolean => Types.MinorType.BIT.getType
-      case _: Array[Byte] => Types.MinorType.VARBINARY.getType
+      case _: Array[Byte] => Types.MinorType.LARGEVARBINARY.getType
       case _: Instant => Types.MinorType.TIMESTAMPMILLI.getType
       case _: Seq[t] => new ArrowType.List()
       case _: Option[t] => arrowType[t] match
