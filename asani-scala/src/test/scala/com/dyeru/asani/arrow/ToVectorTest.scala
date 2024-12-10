@@ -168,7 +168,7 @@ class ToVectorTest extends AnyFunSuite {
     val vectorRoot = people.toArrowVector(root)
 
     // Access the 'data' field vector which will be a ListVector containing VarBinary
-    val dataVector = vectorRoot.getVector("data").asInstanceOf[VarBinaryVector]
+    val dataVector = vectorRoot.getVector("data").asInstanceOf[LargeVarBinaryVector]
 
     // Verify the value count (the number of rows)
     assert(dataVector.getValueCount == 2)

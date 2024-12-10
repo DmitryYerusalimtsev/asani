@@ -74,7 +74,7 @@ class ArrowSchemaTest extends AnyFunSuite with Matchers {
 
     val field = schema.getFields.get(0)
     field.getName shouldBe "data"
-    field.getType shouldBe Types.MinorType.VARBINARY.getType
+    field.getType shouldBe Types.MinorType.LARGEVARBINARY.getType
   }
 
   test("schema should handle Instant type") {
