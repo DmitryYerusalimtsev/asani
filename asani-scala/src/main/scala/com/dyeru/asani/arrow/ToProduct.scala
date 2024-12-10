@@ -20,8 +20,6 @@ object ToProduct {
 
   private inline def derived[T](using p: Mirror.ProductOf[T]): ToProduct[T] = {
     (root: VectorSchemaRoot) =>
-      println(root.contentToTSVString())
-      println(s"ROWS_COUNT: ${root.getRowCount}")
       if root.getRowCount == 0 then List.empty[T]
       else
         (0 until root.getRowCount)
@@ -30,7 +28,6 @@ object ToProduct {
               .map(f => root.getVector(f.getName).getObject(idx))
               .toList
 
-            println(s"VALUES: $values")
             p.fromProduct(listToTuple[p.MirroredElemTypes](values))
           }.toList
   }
@@ -38,9 +35,7 @@ object ToProduct {
   private inline def listToTuple[Tup <: Tuple](list: List[Any]): Tup =
     inline erasedValue[Tup] match {
       case _: EmptyTuple => EmptyTuple.asInstanceOf[Tup]
-      case _: (head *: tail) =>
-        println("WE ARE IN MAPPING!!!")
-        (mapValue(list.head).asInstanceOf[head] *: listToTuple[tail](list.tail)).asInstanceOf[Tup]
+      case _: (head *: tail) => (mapValue(list.head).asInstanceOf[head] *: listToTuple[tail](list.tail)).asInstanceOf[Tup]
     }
 
   private inline def mapValue(value: Any): Any =

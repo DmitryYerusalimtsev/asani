@@ -1,5 +1,5 @@
 ThisBuild / organization := "com.dyeru"
-ThisBuild / version := "0.1.5"
+ThisBuild / version := "0.1.6"
 ThisBuild / scalaVersion := "3.3.4"
 ThisBuild / publishMavenStyle := true
 ThisBuild / description := "Lightning-fast communication framework based on Apache Arrow and gRPC.\n\nThere are 2 implementation planned:\n\nIPC using Apache Arrow memory-mapped files\nRPC using Arrow Flight"
