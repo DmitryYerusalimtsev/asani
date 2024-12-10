@@ -20,6 +20,8 @@ object ToProduct {
 
   private inline def derived[T](using p: Mirror.ProductOf[T]): ToProduct[T] = {
     (root: VectorSchemaRoot) =>
+      println(root.contentToTSVString())
+      println(s"ROWS_COUNT: ${root.getRowCount}")
       if root.getRowCount == 0 then List.empty[T]
       else
         (0 until root.getRowCount)
