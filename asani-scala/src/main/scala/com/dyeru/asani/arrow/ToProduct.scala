@@ -20,16 +20,14 @@ object ToProduct {
 
   private inline def derived[T](using p: Mirror.ProductOf[T]): ToProduct[T] = {
     (root: VectorSchemaRoot) =>
-      if root.getRowCount == 0 then List.empty[T]
-      else
-        (0 until root.getRowCount)
-          .map { idx =>
-            val values = root.getSchema.getFields.asScala
-              .map(f => root.getVector(f.getName).getObject(idx))
-              .toList
+      (0 until root.getRowCount)
+        .map { idx =>
+          val values = root.getSchema.getFields.asScala
+            .map(f => root.getVector(f.getName).getObject(idx))
+            .toList
 
-            p.fromProduct(listToTuple[p.MirroredElemTypes](values))
-          }.toList
+          p.fromProduct(listToTuple[p.MirroredElemTypes](values))
+        }.toList
   }
 
   private inline def listToTuple[Tup <: Tuple](list: List[Any]): Tup =
