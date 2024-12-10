@@ -31,7 +31,7 @@ class ServerTest extends AnyFunSuite with Matchers {
   test("Server should start and process data correctly") {
     // Start the server in a separate thread
     val host = "localhost"
-    val port = 47470
+    val port = scala.math.rint(50000).toInt
     val serverThread = new Thread(() => server.start(host, port))
     serverThread.start()
 
