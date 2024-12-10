@@ -20,24 +20,23 @@ object ToProduct {
 
   private inline def derived[T](using p: Mirror.ProductOf[T]): ToProduct[T] = {
     (root: VectorSchemaRoot) =>
-      (0 until root.getRowCount)
-        .map { idx =>
-          val values = root.getSchema.getFields.asScala
-            .map(f => (f.getName, f.getType))
-            .map((name, tpe) => root.getVector(name).getObject(idx))
-            .toList
+      if root.getRowCount == 0 then List.empty[T]
+      else
+        (0 until root.getRowCount)
+          .map { idx =>
+            val values = root.getSchema.getFields.asScala
+              .map(f => (f.getName, f.getType))
+              .map((name, tpe) => root.getVector(name).getObject(idx))
+              .toList
 
-          p.fromProduct(listToTuple[p.MirroredElemTypes](values))
-        }.toList
+            p.fromProduct(listToTuple[p.MirroredElemTypes](values))
+          }.toList
   }
 
   private inline def listToTuple[Tup <: Tuple](list: List[Any]): Tup =
     inline erasedValue[Tup] match {
       case _: EmptyTuple => EmptyTuple.asInstanceOf[Tup]
-      case _: (head *: tail) =>
-        if list.nonEmpty
-        then (mapValue(list.head).asInstanceOf[head] *: listToTuple[tail](list.tail)).asInstanceOf[Tup]
-        else EmptyTuple.asInstanceOf[Tup]
+      case _: (head *: tail) => (mapValue(list.head).asInstanceOf[head] *: listToTuple[tail](list.tail)).asInstanceOf[Tup]
     }
 
   private inline def mapValue(value: Any): Any =
