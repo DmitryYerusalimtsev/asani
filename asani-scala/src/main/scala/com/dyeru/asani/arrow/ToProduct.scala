@@ -34,7 +34,10 @@ object ToProduct {
   private inline def listToTuple[Tup <: Tuple](list: List[Any]): Tup =
     inline erasedValue[Tup] match {
       case _: EmptyTuple => EmptyTuple.asInstanceOf[Tup]
-      case _: (head *: tail) => (mapValue(list.head).asInstanceOf[head] *: listToTuple[tail](list.tail)).asInstanceOf[Tup]
+      case _: (head *: tail) =>
+        if list.nonEmpty
+        then (mapValue(list.head).asInstanceOf[head] *: listToTuple[tail](list.tail)).asInstanceOf[Tup]
+        else EmptyTuple.asInstanceOf[Tup]
     }
 
   private inline def mapValue(value: Any): Any =

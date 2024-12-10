@@ -71,4 +71,20 @@ class ToProductTest extends AnyFunSuite {
 
     root.close()
   }
+
+  test("ToProduct for case class with empty result") {
+    case class TestClass(data: Array[Byte])
+
+    val fields = Seq(
+      new Field("data", FieldType.nullable(MinorType.VARBINARY.getType), null)
+    )
+    val data = Seq()
+    val root = createVectorSchemaRoot(fields, data)
+
+    val result: List[TestClass] = root.toProducts
+
+    assert(result == Nil)
+
+    root.close()
+  }
 }
