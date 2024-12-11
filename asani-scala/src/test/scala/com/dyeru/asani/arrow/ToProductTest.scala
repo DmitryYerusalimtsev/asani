@@ -83,7 +83,7 @@ class ToProductTest extends AnyFunSuite {
 
     val result: List[TestClass] = root.toProducts
 
-    assert(result == Nil)
+    assert(result == List())
 
     root.close()
   }
