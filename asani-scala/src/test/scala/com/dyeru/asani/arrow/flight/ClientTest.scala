@@ -41,7 +41,7 @@ class ClientTest extends AnyFunSuite with Matchers {
 
     val data = List(
       Person("Alice", 30, Array(1, 2, 3)),
-      Person("Bob", 25, Array.fill(55000)(1))
+      Person("Bob", 25, Array.fill(1000000)(1))
     )
 
     given ExecutionContext = ExecutionContext.global
