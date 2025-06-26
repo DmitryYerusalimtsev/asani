@@ -14,6 +14,12 @@ jobs:
       with:
         java-version: '11'
         distribution: 'adopt'
+
+    - name: Install sbt
+      uses: coursier/setup-action@v1
+      with:
+        apps: sbt
+
     - name: Run tests
       working-directory: ./asani-scala
       run: sbt test
