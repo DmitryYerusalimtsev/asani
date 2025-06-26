@@ -69,8 +69,8 @@ object ToVector {
         case Some(iv) => setField(vector, index, iv)
         case None => vector.setNull(index)
     }
-
-
+  
+  @tailrec
   private def writeListRecursive(writer: UnionListWriter, value: Any): Unit = {
     value match {
       case v: Int => writer.writeInt(v)
@@ -80,14 +80,9 @@ object ToVector {
       case v: Boolean => writer.writeBit(if v then 1 else 0)
       case v: String => writer.writeVarChar(v)
       case v: Instant => writer.writeBigInt(v.toEpochMilli)
-      case v: Option[_] => v match {
+      case v: Option[_] => v match
         case Some(inner) => writeListRecursive(writer, inner)
         case None => writer.writeNull()
-      }
-      case seq: Seq[_] =>
-        writer.startList()
-        seq.foreach(elem => writeListRecursive(writer, elem))
-        writer.endList()
       case other => throw new IllegalArgumentException(s"Unsupported type in list: ${other.getClass}")
     }
   }

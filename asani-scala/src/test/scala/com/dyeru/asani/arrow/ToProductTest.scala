@@ -132,26 +132,4 @@ class ToProductTest extends AnyFunSuite {
 
     root.close()
   }
-
-  test("ToProduct for case class with Seq[Seq[Float]]") {
-    case class TestClass(data: Seq[Seq[Float]])
-
-    val data = Seq(
-      TestClass(Seq(Seq[Float](1, 2, 3))),
-      TestClass(Seq(Seq[Float](4, 5, 6)))
-    )
-
-    val allocator = new RootAllocator(Long.MaxValue)
-    val root = VectorSchemaRoot.create(ArrowSchema.derived[TestClass].schema, allocator)
-
-    println(root.contentToTSVString())
-
-    val vectorRoot = data.toArrowVector(root)
-
-    val result: List[TestClass] = root.toProducts
-
-    assert(result == List(TestClass(List(List(1, 2, 3))), TestClass(List(List(4, 5, 6)))))
-
-    root.close()
-  }
 }
