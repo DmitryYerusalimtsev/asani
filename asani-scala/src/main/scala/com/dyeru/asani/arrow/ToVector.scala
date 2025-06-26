@@ -2,6 +2,7 @@ package com.dyeru.asani.arrow
 
 import org.apache.arrow.vector.*
 import org.apache.arrow.vector.complex.ListVector
+import org.apache.arrow.vector.complex.impl.UnionListWriter
 
 import java.nio.charset.StandardCharsets
 import java.time.Instant
@@ -22,7 +23,7 @@ object ToVector {
 
   private inline def derived[T](using p: Mirror.ProductOf[T]): ToVector[T] = {
     (values: Seq[T], root: VectorSchemaRoot) => {
-      
+
       val records = values.map(implicitly[ToMap[T]].toMap)
 
       root.allocateNew()
@@ -60,7 +61,7 @@ object ToVector {
         val writer = vector.asInstanceOf[ListVector].getWriter
         writer.setPosition(index)
         writer.startList()
-        v.zipWithIndex.foreach((elem, i) => writer.writeVarChar(elem.toString))
+        v.foreach(elem => writeListRecursive(writer, elem))
         writer.endList()
         writer.setValueCount(v.length)
 
@@ -68,6 +69,23 @@ object ToVector {
         case Some(iv) => setField(vector, index, iv)
         case None => vector.setNull(index)
     }
+  
+  @tailrec
+  private def writeListRecursive(writer: UnionListWriter, value: Any): Unit = {
+    value match {
+      case v: Int => writer.writeInt(v)
+      case v: Long => writer.writeBigInt(v)
+      case v: Float => writer.writeFloat4(v)
+      case v: Double => writer.writeFloat8(v)
+      case v: Boolean => writer.writeBit(if v then 1 else 0)
+      case v: String => writer.writeVarChar(v)
+      case v: Instant => writer.writeBigInt(v.toEpochMilli)
+      case v: Option[_] => v match
+        case Some(inner) => writeListRecursive(writer, inner)
+        case None => writer.writeNull()
+      case other => throw new IllegalArgumentException(s"Unsupported type in list: ${other.getClass}")
+    }
+  }
 
   // Enable derivation for case classes
   inline given derivedToVector[T](using m: Mirror.ProductOf[T]): ToVector[T] = derived

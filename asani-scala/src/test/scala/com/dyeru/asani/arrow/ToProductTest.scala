@@ -1,8 +1,10 @@
 package com.dyeru.asani.arrow
 
 import com.dyeru.asani.arrow.createVectorSchemaRoot
+import org.apache.arrow.memory.RootAllocator
+import org.apache.arrow.vector.VectorSchemaRoot
 import org.scalatest.funsuite.AnyFunSuite
-import org.apache.arrow.vector.types.pojo.{Field, FieldType}
+import org.apache.arrow.vector.types.pojo.{ArrowType, Field, FieldType}
 import org.apache.arrow.vector.types.Types.MinorType
 
 import java.time.Instant
@@ -84,6 +86,49 @@ class ToProductTest extends AnyFunSuite {
     val result: List[TestClass] = root.toProducts
 
     assert(result == List())
+
+    root.close()
+  }
+
+  test("ToProduct for case class with Seq[Float]") {
+    case class TestClass(data: Seq[Float])
+
+    val data = Seq(
+      TestClass(Seq[Float](1, 2, 3)),
+      TestClass(Seq[Float](4, 5, 6))
+    )
+
+    val allocator = new RootAllocator(Long.MaxValue)
+    val root = VectorSchemaRoot.create(ArrowSchema.derived[TestClass].schema, allocator)
+
+    val vectorRoot = data.toArrowVector(root)
+
+    val result: List[TestClass] = root.toProducts
+
+    assert(result.map(_.data.toList) == List(List(1, 2, 3), List(4, 5, 6)))
+
+    root.close()
+  }
+
+  test("ToProduct for case class with Seq[Option[Float]]") {
+    case class TestClass(data: Seq[Option[Float]])
+
+    val data = Seq(
+      TestClass(Seq(None, Some(2), Some(3))),
+      TestClass(Seq(Some(4), None, None))
+    )
+
+    val allocator = new RootAllocator(Long.MaxValue)
+    val root = VectorSchemaRoot.create(ArrowSchema.derived[TestClass].schema, allocator)
+
+    data.toArrowVector(root)
+
+    val result: List[TestClass] = root.toProducts
+
+    assert(result == List(
+      TestClass(Seq(None, Some(2), Some(3))),
+      TestClass(Seq(Some(4), None, None)))
+    )
 
     root.close()
   }
