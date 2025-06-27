@@ -33,21 +33,18 @@ object ToProduct {
   private inline def listToTuple[Tup <: Tuple](list: List[Any]): Tup =
     inline erasedValue[Tup] match {
       case _: EmptyTuple => EmptyTuple.asInstanceOf[Tup]
-      case _: (head *: tail) => (mapGenericValue[head](list.head).asInstanceOf[head] *: listToTuple[tail](list.tail)).asInstanceOf[Tup]
+      case _: (head *: tail) => (mapValue[head](list.head).asInstanceOf[head] *: listToTuple[tail](list.tail)).asInstanceOf[Tup]
     }
 
-  private inline def mapGenericValue[T](value: Any): Any =
+  private inline def mapValue[T](value: Any): Any =
     inline erasedValue[T] match {
       case _: Option[t] => if value != null then Some(mapValue(value).asInstanceOf[t]) else None
-      case _: Seq[t] => value.asInstanceOf[JsonStringArrayList[_]].toArray.toList.map(mapGenericValue[t])
-      case _: Any => mapValue(value)
-    }
-
-  private def mapValue(value: Any): Any =
-    value match {
-      case v: Text => v.toString
-      case v: LocalDateTime => v.toInstant(ZoneOffset.UTC)
-      case v: Any => v
+      case _: Seq[t] => value.asInstanceOf[JsonStringArrayList[_]].toArray.toList.map(mapValue[t])
+      case _: Any => value match {
+        case v: Text => v.toString
+        case v: LocalDateTime => v.toInstant(ZoneOffset.UTC)
+        case v: Any => v
+      }
     }
 
   // Enable derivation for case classes
